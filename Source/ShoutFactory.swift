@@ -29,7 +29,8 @@ public class ShoutView: UIView {
   public private(set) lazy var gestureContainer: UIView = {
     let view = UIView()
     view.userInteractionEnabled = true
-
+    view.backgroundColor = ColorList.Shout.background
+    
     return view
     }()
 
@@ -37,7 +38,7 @@ public class ShoutView: UIView {
     let view = UIView()
     view.backgroundColor = ColorList.Shout.dragIndicator
     view.layer.cornerRadius = Dimensions.indicatorHeight / 2
-    view.userInteractionEnabled = true
+    view.userInteractionEnabled = false
 
     return view
     }()
@@ -64,7 +65,7 @@ public class ShoutView: UIView {
     let label = UILabel()
     label.font = FontList.Shout.subtitle
     label.textColor = ColorList.Shout.subtitle
-    label.numberOfLines = 1
+    label.numberOfLines = 0
 
     return label
     }()
@@ -95,7 +96,7 @@ public class ShoutView: UIView {
     super.init(frame: frame)
 
     addSubview(backgroundView)
-    [indicatorView, imageView, titleLabel, subtitleLabel, gestureContainer].forEach {
+    [imageView, titleLabel, subtitleLabel, gestureContainer, indicatorView].forEach {
       backgroundView.addSubview($0) }
 
     clipsToBounds = false
@@ -122,7 +123,12 @@ public class ShoutView: UIView {
   // MARK: - Configuration
 
   public func craft(announcement: Announcement, to: UIViewController, completion: (() -> ())?) {
+    var subTitleSpacing: CGFloat = 0
+    if let subtitle = announcement.subtitle where !subtitle.isEmpty {
+        subTitleSpacing = 10
+    }
     Dimensions.height = UIApplication.sharedApplication().statusBarHidden ? 70 : 80
+    Dimensions.height = Dimensions.height + subTitleSpacing
 
     panGestureActive = false
     shouldSilent = false
@@ -186,9 +192,13 @@ public class ShoutView: UIView {
     if let text = subtitleLabel.text where text.isEmpty {
       titleLabel.center.y = imageView.center.y - 2.5
     }
-
+    
+    var labelHorizontalSpacing = Dimensions.imageSize - (Dimensions.imageOffset * 2)
+    if imageView.image == nil { labelHorizontalSpacing = Dimensions.textOffset * 2 }
     [titleLabel, subtitleLabel].forEach {
-      $0.frame.size.width = totalWidth - Dimensions.imageSize - (Dimensions.imageOffset * 2) }
+        $0.frame.size.width = totalWidth - labelHorizontalSpacing
+    }
+    subtitleLabel.sizeToFit()
   }
 
   // MARK: - Actions
