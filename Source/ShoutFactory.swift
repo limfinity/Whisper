@@ -148,7 +148,7 @@ public class ShoutView: UIView {
       $0.sizeToFit()
     }
 
-    if imageView.image == nil { Dimensions.textOffset = 18 }
+    if imageView.image == nil { Dimensions.textOffset = Dimensions.imageOffset }
 
     displayTimer.invalidate()
     displayTimer = NSTimer.scheduledTimerWithTimeInterval(announcement.duration,
@@ -234,11 +234,12 @@ public class ShoutView: UIView {
   @objc private func handlePanGestureRecognizer() {
     let translation = panGestureRecognizer.translationInView(self)
     var duration: NSTimeInterval = 0
-
+    let yThreshold = max(CGRectGetMaxY(subtitleLabel.frame) - Dimensions.height + Dimensions.indicatorHeight + 5, 12)
+    
     if panGestureRecognizer.state == .Changed || panGestureRecognizer.state == .Began {
       panGestureActive = true
-      if translation.y >= 12 {
-        frame.size.height = Dimensions.height + 12 + (translation.y) / 25
+      if translation.y >= yThreshold {
+        frame.size.height = Dimensions.height + yThreshold + (translation.y) / 25
       } else {
         frame.size.height = Dimensions.height + translation.y
       }
