@@ -20,7 +20,7 @@ public class ShoutView: UIView {
   public private(set) lazy var backgroundView: UIView = {
     let view = UIView()
     view.backgroundColor = ColorList.Shout.background
-    view.alpha = 0.98
+    view.alpha = 1
     view.clipsToBounds = true
 
     return view
@@ -133,10 +133,21 @@ public class ShoutView: UIView {
     panGestureActive = false
     shouldSilent = false
     configureView(announcement)
+    updateConstants()
     shout(to: to)
 
     self.completion = completion
   }
+    
+    func updateConstants() {
+        titleLabel.font = FontList.Shout.title
+        subtitleLabel.font = FontList.Shout.subtitle
+        titleLabel.textColor = ColorList.Shout.title
+        subtitleLabel.textColor = ColorList.Shout.subtitle
+        backgroundView.backgroundColor = ColorList.Shout.background
+        gestureContainer.backgroundColor = ColorList.Shout.background
+        indicatorView.backgroundColor = ColorList.Shout.dragIndicator
+    }
 
   public func configureView(announcement: Announcement) {
     self.announcement = announcement
@@ -179,19 +190,6 @@ public class ShoutView: UIView {
   public func setupFrames() {
     let totalWidth = UIScreen.mainScreen().bounds.width
     let offset: CGFloat = UIApplication.sharedApplication().statusBarHidden ? 2.5 : 5
-
-    backgroundView.frame.size = CGSize(width: totalWidth, height: Dimensions.height)
-    gestureContainer.frame = CGRect(x: 0, y: Dimensions.height - 20, width: totalWidth, height: 20)
-    indicatorView.frame = CGRect(x: (totalWidth - Dimensions.indicatorWidth) / 2,
-      y: Dimensions.height - Dimensions.indicatorHeight - 5, width: Dimensions.indicatorWidth, height: Dimensions.indicatorHeight)
-    imageView.frame = CGRect(x: Dimensions.imageOffset, y: (Dimensions.height - Dimensions.imageSize) / 2 + offset,
-      width: Dimensions.imageSize, height: Dimensions.imageSize)
-    titleLabel.frame.origin = CGPoint(x: Dimensions.textOffset, y: imageView.frame.origin.y + 3)
-    subtitleLabel.frame.origin = CGPoint(x: Dimensions.textOffset, y: CGRectGetMaxY(titleLabel.frame) + 2.5)
-
-    if let text = subtitleLabel.text where text.isEmpty {
-      titleLabel.center.y = imageView.center.y - 2.5
-    }
     
     var labelHorizontalSpacing = Dimensions.imageSize - (Dimensions.imageOffset * 2)
     if imageView.image == nil { labelHorizontalSpacing = Dimensions.textOffset * 2 }
@@ -199,6 +197,25 @@ public class ShoutView: UIView {
         $0.frame.size.width = totalWidth - labelHorizontalSpacing
     }
     subtitleLabel.sizeToFit()
+    
+    titleLabel.frame.origin = CGPoint(x: Dimensions.textOffset, y: offset + 15)
+    subtitleLabel.frame.origin = CGPoint(x: Dimensions.textOffset, y: CGRectGetMaxY(titleLabel.frame) + 2.5)
+    
+    Dimensions.height = CGRectGetMaxY(subtitleLabel.frame) + 20
+
+    backgroundView.frame.size = CGSize(width: totalWidth, height: Dimensions.height)
+    gestureContainer.frame = CGRect(x: 0, y: Dimensions.height - 20, width: totalWidth, height: 20)
+    indicatorView.frame = CGRect(x: (totalWidth - Dimensions.indicatorWidth) / 2,
+      y: Dimensions.height - Dimensions.indicatorHeight - 5, width: Dimensions.indicatorWidth, height: Dimensions.indicatorHeight)
+    imageView.frame = CGRect(x: Dimensions.imageOffset, y: (Dimensions.height - Dimensions.imageSize) / 2 + offset,
+                             width: Dimensions.imageSize, height: Dimensions.imageSize)
+    
+
+    if let text = subtitleLabel.text where text.isEmpty {
+      titleLabel.center.y = imageView.center.y - 2.5
+    }
+    
+    
   }
 
   // MARK: - Actions
@@ -234,7 +251,7 @@ public class ShoutView: UIView {
   @objc private func handlePanGestureRecognizer() {
     let translation = panGestureRecognizer.translationInView(self)
     var duration: NSTimeInterval = 0
-    let yThreshold = max(CGRectGetMaxY(subtitleLabel.frame) - Dimensions.height + Dimensions.indicatorHeight + 5, 12)
+    let yThreshold = max(CGRectGetMaxY(subtitleLabel.frame) - Dimensions.height + Dimensions.indicatorHeight, 12)
     
     if panGestureRecognizer.state == .Changed || panGestureRecognizer.state == .Began {
       panGestureActive = true
